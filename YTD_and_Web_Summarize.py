@@ -7,7 +7,11 @@ from langchain_community.document_loaders import YoutubeLoader,WebBaseLoader, Un
 import logging
 import validators
 from langchain.prompts import PromptTemplate
+import nltk
 
+
+#nltk.download('punkt_tab')
+#nltk.download('averaged_perceptron_tagger_eng')
 log = logging.getLogger(__name__)
 
 load_dotenv()
@@ -31,12 +35,12 @@ groq_api_key=os.getenv("Groq_API_KEY")
 llm=ChatGroq(model="Gemma-7b-It",api_key=groq_api_key)
 
 prompt_template="""
-Provide a Summary of the following content in 300 words :
+Provide a Summary of the following content in 300 words:
 Content:{text}
 """
 prompt=PromptTemplate(template=prompt_template,input_variables=["text"])
 
-st.set_page_config(page_title="Summarize Text from YT or Website",page_icon="/ai_icon.png")
+st.set_page_config(page_title="Summarize Text from YT or Website",page_icon="🦜🛠️🕸️")
 st.title("Summarize Text from Youtube or Website")
 st.subheader("Summarize URL")
 inp_url=st.text_input("Enter Website Url/Youtube video link",label_visibility="collapsed")
@@ -59,8 +63,8 @@ if st.button("Summarize the content from Youtube or Website"):
 
                 data=loader.load()
 
-                chain=load_summarize_chain(llm=llm,chain_type='refine',verbose=True)
-                text_summary=chain.run(data)
+                chain=load_summarize_chain(llm=llm,chain_type='stuff',prompt=prompt)
+                text_summary=chain.invoke(data)
                 st.success(text_summary)
     
         except Exception as e:
